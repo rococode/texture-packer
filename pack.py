@@ -125,6 +125,11 @@ def separate(in_sprite_info, out_dir):
         # sprite = Image.new("RGBA", (max_x, curr_y), color=(178, 237, 255, 255))
         sprite = Image.new("RGBA", (max_x, curr_y), color=(178, 237, 255, 0))
         for cx, cy, im in images:
+            # do padding by just repasting - inefficient but easy to code haha
+            for dx in [-2, 2, -1, 1]:
+                sprite.paste(im, (cx + dx, cy, cx + dx + im.size[0], cy + im.size[1]))
+            for dy in [-2, 2, -1, 1]:
+                sprite.paste(im, (cx, cy + dy, cx + im.size[0], cy + dy + im.size[1]))
             sprite.paste(im, (cx, cy, cx + im.size[0], cy + im.size[1]))
         sprite.save(out_dir + os.sep + si.name + ".png")
         sprite.save(COPY_DIR + os.sep + si.name + ".png")
