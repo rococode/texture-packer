@@ -20,7 +20,7 @@ AUTO_FILE = None
 COPY_DIR = None
 
 class SpriteInfo:
-    def __init__(self, file_name, name, fw, fh, sx, sy, sw, sh, k):
+    def __init__(self, file_name, name, fw, fh, sx, sy, sw, sh, k, pad):
         self.file_name = file_name
         self.name = name
         self.fw = int(fw)
@@ -30,6 +30,7 @@ class SpriteInfo:
         self.sw = int(sw) if int(sw) is not 0 else int(fw)
         self.sh = int(sh) if int(sh) is not 0 else int(fh)
         self.keep_shape = True if int(k) is 1 else False
+        self.do_pad = True if int(pad) is 1 else False
         self.crop = []
         self.final_w = 0
         self.final_h = 0
@@ -56,10 +57,10 @@ def read(input_file):
                 continue
             tmp = line.split("\t")
             data = [x for x in tmp if len(x) is not 0]
-            if len(data) != 9:
+            if len(data) != 10:
                 print("WARNING: FAILED TO PARSE LINE " + str(i) + ":\n\t" + str(line) + "\n\t" + str(data))
                 continue
-            si = SpriteInfo(data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8])
+            si = SpriteInfo(data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9])
             info.append(si)
     return info
 
@@ -126,10 +127,12 @@ def separate(in_sprite_info, out_dir):
         sprite = Image.new("RGBA", (max_x, curr_y), color=(178, 237, 255, 0))
         for cx, cy, im in images:
             # do padding by just repasting - inefficient but easy to code haha
-            for dx in [-2, 2, -1, 1]:
-                sprite.paste(im, (cx + dx, cy, cx + dx + im.size[0], cy + im.size[1]))
-            for dy in [-2, 2, -1, 1]:
-                sprite.paste(im, (cx, cy + dy, cx + im.size[0], cy + dy + im.size[1]))
+            if si.do_pad:
+                # print("padding " + si.name)
+                for dx in [-2, 2, -1, 1]:
+                    sprite.paste(im, (cx + dx, cy, cx + dx + im.size[0], cy + im.size[1]))
+                for dy in [-2, 2, -1, 1]:
+                    sprite.paste(im, (cx, cy + dy, cx + im.size[0], cy + dy + im.size[1]))
             sprite.paste(im, (cx, cy, cx + im.size[0], cy + im.size[1]))
         sprite.save(out_dir + os.sep + si.name + ".png")
         sprite.save(COPY_DIR + os.sep + si.name + ".png")
